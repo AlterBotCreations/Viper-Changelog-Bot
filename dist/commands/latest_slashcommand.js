@@ -30,9 +30,9 @@ class LatestSlashCommand {
         return __awaiter(this, void 0, void 0, function* () {
             // Pull the data from the github.
             const changelogURL = "https://raw.githubusercontent.com/Ciccioarmory/loadingscreen/main/changelog.json";
-            const data = JSON.parse(yield __classPrivateFieldGet(this, _a, "m", _LatestSlashCommand_getChangelogFromGitHub).call(this, changelogURL));
+            const data = yield __classPrivateFieldGet(this, _a, "m", _LatestSlashCommand_getChangelogFromGitHub).call(this, changelogURL);
             // Format the data into a nice embed.
-            const embed = __classPrivateFieldGet(this, _a, "m", _LatestSlashCommand_getChangelogEmbed).call(this, data[Object.keys(data)[0]]);
+            const embed = __classPrivateFieldGet(this, _a, "m", _LatestSlashCommand_getChangelogEmbed).call(this, data);
             // Get the changelog channel ID from the github.
             const optionsURL = "https://raw.githubusercontent.com/AlterBotCreations/Viper-Changelog-Bot/main/options.json?token=GHSAT0AAAAAACDFRVBTHEEWB35YLW4QNZV6ZFEUMNA";
             const changelogChannelID = yield __classPrivateFieldGet(this, _a, "m", _LatestSlashCommand_getChangelogChannelIDFromGitHub).call(this, optionsURL);
@@ -50,8 +50,7 @@ class LatestSlashCommand {
 _a = LatestSlashCommand, _LatestSlashCommand_getChangelogFromGitHub = function _LatestSlashCommand_getChangelogFromGitHub(url) {
     return __awaiter(this, void 0, void 0, function* () {
         const data = yield axios_1.default.get(url);
-        const parsedData = JSON.parse(data.data);
-        return parsedData.items;
+        return data.data.items;
     });
 }, _LatestSlashCommand_getChangelogChannelIDFromGitHub = function _LatestSlashCommand_getChangelogChannelIDFromGitHub(url) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -61,7 +60,7 @@ _a = LatestSlashCommand, _LatestSlashCommand_getChangelogFromGitHub = function _
     });
 }, _LatestSlashCommand_getChangelogEmbed = function _LatestSlashCommand_getChangelogEmbed(changelogEntry) {
     return new builders_1.EmbedBuilder()
-        .setDescription(changelogEntry);
+        .setDescription(`${changelogEntry}`);
 };
 LatestSlashCommand.SLASH_COMMAND = new discord_js_1.SlashCommandBuilder()
     .setName("latest")
