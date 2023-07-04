@@ -21,6 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const builders_1 = require("@discordjs/builders");
 const discord_js_1 = require("discord.js");
 const axios_1 = __importDefault(require("axios"));
+const config_json_1 = require("../config.json");
 /** Sends the latest changelog entry to the changelog channel as a nicely-formatted embed.
  *
  */
@@ -39,13 +40,18 @@ class LatestSlashCommand {
             const changelogChannelID = yield __classPrivateFieldGet(this, _a, "m", _LatestSlashCommand_getChangelogChannelIDFromGitHub).call(this);
             // Send the embed to the changelog channel.
             __classPrivateFieldGet(this, _a, "m", _LatestSlashCommand_sendChangelogEmbedToChannel).call(this, interaction.guild, changelogChannelID, embed);
+            // Reply to the interaction.
+            yield interaction.reply({
+                ephemeral: true,
+                content: `Latest changelog entry sent to <#${changelogChannelID}>`
+            });
         });
     }
 }
 _a = LatestSlashCommand, _LatestSlashCommand_getChangelogFromGitHub = function _LatestSlashCommand_getChangelogFromGitHub() {
     return __awaiter(this, void 0, void 0, function* () {
         // Define the changelog url.
-        const url = "https://raw.githubusercontent.com/Ciccioarmory/loadingscreen/main/changelog.json";
+        const url = config_json_1.changelogURL;
         // Use axios to retrieve the data.
         const data = yield axios_1.default.get(url);
         return data.data.items;
@@ -53,10 +59,10 @@ _a = LatestSlashCommand, _LatestSlashCommand_getChangelogFromGitHub = function _
 }, _LatestSlashCommand_getChangelogChannelIDFromGitHub = function _LatestSlashCommand_getChangelogChannelIDFromGitHub() {
     return __awaiter(this, void 0, void 0, function* () {
         // Define the changelog url.
-        const url = "https://raw.githubusercontent.com/AlterBotCreations/Viper-Changelog-Bot/main/options.json?token=GHSAT0AAAAAACEWZLKLFFS6K337ZY25ZRB6ZFEU6ZQ";
+        const url = config_json_1.optionsURL;
         // Use axios to retrieve the data.
-        const data = yield axios_1.default.get(url);
-        const parsedData = JSON.parse(data.data);
+        const response = yield axios_1.default.get(url);
+        const parsedData = response.data;
         return parsedData["changelog_channel_id"];
     });
 }, _LatestSlashCommand_getChangelogEmbed = function _LatestSlashCommand_getChangelogEmbed(changelogEntry) {

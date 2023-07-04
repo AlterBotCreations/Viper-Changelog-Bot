@@ -1,6 +1,7 @@
 import { EmbedBuilder } from "@discordjs/builders";
 import { ChatInputCommandInteraction, Embed, Guild, SlashCommandBuilder, TextBasedChannel } from "discord.js";
 import axios from 'axios';
+import { changelogURL, optionsURL } from "../config.json";
 
 /** Sends the latest changelog entry to the changelog channel as a nicely-formatted embed.
  * 
@@ -21,7 +22,7 @@ export default class LatestSlashCommand {
     static async #getChangelogFromGitHub(): Promise<string> {
 
         // Define the changelog url.
-        const url: string = "https://raw.githubusercontent.com/Ciccioarmory/loadingscreen/main/changelog.json";
+        const url: string = changelogURL;
 
         // Use axios to retrieve the data.
         const data = await axios.get(url);
@@ -36,11 +37,11 @@ export default class LatestSlashCommand {
     static async #getChangelogChannelIDFromGitHub(): Promise<string> {
 
         // Define the changelog url.
-        const url: string = "https://raw.githubusercontent.com/AlterBotCreations/Viper-Changelog-Bot/main/options.json?token=GHSAT0AAAAAACEWZLKLFFS6K337ZY25ZRB6ZFEU6ZQ";
+        const url: string = optionsURL;
 
         // Use axios to retrieve the data.
-        const data = await axios.get(url);
-        const parsedData = JSON.parse(data.data);
+        const response = await axios.get(url);
+        const parsedData = response.data;
         return parsedData["changelog_channel_id"];
     }
 
@@ -88,6 +89,14 @@ export default class LatestSlashCommand {
 
         // Send the embed to the changelog channel.
         this.#sendChangelogEmbedToChannel(interaction.guild, changelogChannelID, embed);
+
+
+        // Reply to the interaction.
+        await interaction.reply({
+            ephemeral: true,
+            content: `Latest changelog entry sent to <#${changelogChannelID}>`
+        });
+
     }
 
 }
