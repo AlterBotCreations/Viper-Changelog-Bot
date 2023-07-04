@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { ChatInputCommandInteraction, SlashCommandBuilder, TextBasedChannel } from "discord.js";
+import { ChatInputCommandInteraction, Embed, Guild, SlashCommandBuilder, TextBasedChannel } from "discord.js";
 import axios from 'axios';
 
 /** Sends the latest changelog entry to the changelog channel as a nicely-formatted embed.
@@ -18,7 +18,12 @@ export default class LatestSlashCommand {
      * @param url The url of the github .json file.
      * @returns 
      */
-    static async #getChangelogFromGitHub(url: string): Promise<string> {
+    static async #getChangelogFromGitHub(): Promise<string> {
+
+        // Define the changelog url.
+        const url: string = "https://raw.githubusercontent.com/Ciccioarmory/loadingscreen/main/changelog.json";
+
+        // Use axios to retrieve the data.
         const data = await axios.get(url);
         return data.data.items;
     }
@@ -28,7 +33,12 @@ export default class LatestSlashCommand {
      * @param url 
      * @returns 
      */
-    static async #getChangelogChannelIDFromGitHub(url: string): Promise<string> {
+    static async #getChangelogChannelIDFromGitHub(): Promise<string> {
+
+        // Define the changelog url.
+        const url: string = "https://raw.githubusercontent.com/AlterBotCreations/Viper-Changelog-Bot/main/options.json?token=GHSAT0AAAAAACEWZLKLFFS6K337ZY25ZRB6ZFEU6ZQ";
+
+        // Use axios to retrieve the data.
         const data = await axios.get(url);
         const parsedData = JSON.parse(data.data);
         return parsedData["changelog_channel_id"];
@@ -41,30 +51,43 @@ export default class LatestSlashCommand {
      */
     static #getChangelogEmbed(changelogEntry: string): EmbedBuilder {
         return new EmbedBuilder()
-        .setDescription(`${changelogEntry}`);
+            .setDescription(`${changelogEntry}`);
     }
 
-    static async execute(interaction: ChatInputCommandInteraction) {
-
-        // Pull the data from the github.
-        const changelogURL: string = "https://raw.githubusercontent.com/Ciccioarmory/loadingscreen/main/changelog.json";
-        const data = await this.#getChangelogFromGitHub(changelogURL);
-
-        // Format the data into a nice embed.
-        const embed = this.#getChangelogEmbed(data);
-
-        // Get the changelog channel ID from the github.
-        const optionsURL: string = "https://raw.githubusercontent.com/AlterBotCreations/Viper-Changelog-Bot/main/options.json?token=GHSAT0AAAAAACDFRVBTHEEWB35YLW4QNZV6ZFEUMNA";
-        const changelogChannelID: string = await this.#getChangelogChannelIDFromGitHub(optionsURL);
-
-        // Send the embed to the changelog channel.
-        interaction.guild?.channels.fetch(changelogChannelID).then(channel => {
+    /** Sends the changelog embed to the given channel id.
+     * 
+     * @param guild The guild the channel is in.
+     * @param channelId The id of the channel to send the embed to.
+     * @param embed The embedbuilder to send to the channel.
+     */
+    static #sendChangelogEmbedToChannel(guild: Guild, channelId: string, embed: EmbedBuilder) {
+        guild?.channels.fetch(channelId).then(channel => {
             if (channel?.isTextBased) {
                 (channel as TextBasedChannel).send({
                     embeds: [embed]
                 })
             }
         })
+    }
+
+    static async execute(interaction: ChatInputCommandInteraction) {
+
+        // If interaction.guild is null, throw an error.
+        if (interaction.guild === null) {
+            throw new Error(`interaction.guild is null.`);
+        }
+
+        // Pull the data from the github.
+        const data = await this.#getChangelogFromGitHub();
+
+        // Format the data into a nice embed.
+        const embed = this.#getChangelogEmbed(data);
+
+        // Get the changelog channel ID from the github.
+        const changelogChannelID: string = await this.#getChangelogChannelIDFromGitHub();
+
+        // Send the embed to the changelog channel.
+        this.#sendChangelogEmbedToChannel(interaction.guild, changelogChannelID, embed);
     }
 
 }
