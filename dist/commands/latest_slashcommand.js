@@ -35,7 +35,7 @@ class LatestSlashCommand {
             // Pull the data from the github.
             const data = yield __classPrivateFieldGet(this, _a, "m", _LatestSlashCommand_getChangelogFromGitHub).call(this);
             // Format the data into a nice embed.
-            const embed = __classPrivateFieldGet(this, _a, "m", _LatestSlashCommand_getChangelogEmbed).call(this, data);
+            const embed = __classPrivateFieldGet(this, _a, "m", _LatestSlashCommand_getChangelogEmbed).call(this, data[0]);
             // Get the changelog channel ID from the github.
             const changelogChannelID = yield __classPrivateFieldGet(this, _a, "m", _LatestSlashCommand_getChangelogChannelIDFromGitHub).call(this);
             // Send the embed to the changelog channel.
@@ -50,24 +50,28 @@ class LatestSlashCommand {
 }
 _a = LatestSlashCommand, _LatestSlashCommand_getChangelogFromGitHub = function _LatestSlashCommand_getChangelogFromGitHub() {
     return __awaiter(this, void 0, void 0, function* () {
-        // Define the changelog url.
-        const url = config_json_1.changelogURL;
         // Use axios to retrieve the data.
-        const data = yield axios_1.default.get(url);
+        const data = yield axios_1.default.get(config_json_1.changelogURL);
         return data.data.items;
     });
 }, _LatestSlashCommand_getChangelogChannelIDFromGitHub = function _LatestSlashCommand_getChangelogChannelIDFromGitHub() {
     return __awaiter(this, void 0, void 0, function* () {
-        // Define the changelog url.
-        const url = config_json_1.optionsURL;
         // Use axios to retrieve the data.
-        const response = yield axios_1.default.get(url);
+        const response = yield axios_1.default.get(config_json_1.optionsURL);
         const parsedData = response.data;
         return parsedData["changelog_channel_id"];
     });
 }, _LatestSlashCommand_getChangelogEmbed = function _LatestSlashCommand_getChangelogEmbed(changelogEntry) {
+    // Create the description.
+    var description = "";
+    // Append the changes.
+    for (const index in changelogEntry.changes) {
+        description += `➤ ${changelogEntry.changes[index]}\n`;
+    }
     return new builders_1.EmbedBuilder()
-        .setDescription(`${changelogEntry}`);
+        .setTitle(`${changelogEntry.date}`)
+        .setDescription(`${description}`)
+        .setColor(discord_js_1.Colors.Purple);
 }, _LatestSlashCommand_sendChangelogEmbedToChannel = function _LatestSlashCommand_sendChangelogEmbedToChannel(guild, channelId, embed) {
     guild === null || guild === void 0 ? void 0 : guild.channels.fetch(channelId).then(channel => {
         if (channel === null || channel === void 0 ? void 0 : channel.isTextBased) {

@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { ChatInputCommandInteraction, Embed, Guild, SlashCommandBuilder, TextBasedChannel } from "discord.js";
+import { ChatInputCommandInteraction, ColorResolvable, Colors, Guild, SlashCommandBuilder, TextBasedChannel } from "discord.js";
 import axios from 'axios';
 import { changelogURL, optionsURL } from "../config.json";
 
@@ -20,27 +20,19 @@ export default class LatestSlashCommand {
      * @returns 
      */
     static async #getChangelogFromGitHub(): Promise<string> {
-
-        // Define the changelog url.
-        const url: string = changelogURL;
-
         // Use axios to retrieve the data.
-        const data = await axios.get(url);
+        const data = await axios.get(changelogURL);
         return data.data.items;
     }
 
-    /** Returns the changelog channel id from the url.
+    /** Returns the changelog channel id from the github options.
      * 
      * @param url 
      * @returns 
      */
     static async #getChangelogChannelIDFromGitHub(): Promise<string> {
-
-        // Define the changelog url.
-        const url: string = optionsURL;
-
         // Use axios to retrieve the data.
-        const response = await axios.get(url);
+        const response = await axios.get(optionsURL);
         const parsedData = response.data;
         return parsedData["changelog_channel_id"];
     }
@@ -50,9 +42,20 @@ export default class LatestSlashCommand {
      * @param changelogEntry 
      * @returns 
      */
-    static #getChangelogEmbed(changelogEntry: string): EmbedBuilder {
+    static #getChangelogEmbed(changelogEntry: any): EmbedBuilder {
+
+        // Create the description.
+        var description: string = "";
+
+        // Append the changes.
+        for(const index in changelogEntry.changes) {
+            description += `➤ ${changelogEntry.changes[index]}\n`;
+        }
+
         return new EmbedBuilder()
-            .setDescription(`${changelogEntry}`);
+            .setTitle(`${changelogEntry.date}`)
+            .setDescription(`${description}`)
+            .setColor(Colors.Purple);
     }
 
     /** Sends the changelog embed to the given channel id.
@@ -82,7 +85,7 @@ export default class LatestSlashCommand {
         const data = await this.#getChangelogFromGitHub();
 
         // Format the data into a nice embed.
-        const embed = this.#getChangelogEmbed(data);
+        const embed = this.#getChangelogEmbed(data[0]);
 
         // Get the changelog channel ID from the github.
         const changelogChannelID: string = await this.#getChangelogChannelIDFromGitHub();
