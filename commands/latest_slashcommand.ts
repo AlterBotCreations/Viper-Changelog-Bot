@@ -52,10 +52,17 @@ export default class LatestSlashCommand {
             description += `➤ ${changelogEntry.changes[index]}\n`;
         }
 
+        const iconURL: string = "https://cdn.discordapp.com/attachments/1030793773921345556/1047605904645824582/ViperNeon.png";
+
         return new EmbedBuilder()
             .setTitle(`${changelogEntry.date}`)
             .setDescription(`${description}`)
-            .setColor(Colors.Purple);
+            .setColor(Colors.Purple)
+            .setAuthor({
+                name: "viper-antiNerds",
+                iconURL: iconURL
+            })
+            .setThumbnail(iconURL);
     }
 
     /** Sends the changelog embed to the given channel id.

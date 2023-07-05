@@ -68,10 +68,16 @@ _a = LatestSlashCommand, _LatestSlashCommand_getChangelogFromGitHub = function _
     for (const index in changelogEntry.changes) {
         description += `➤ ${changelogEntry.changes[index]}\n`;
     }
+    const iconURL = "https://cdn.discordapp.com/attachments/1030793773921345556/1047605904645824582/ViperNeon.png";
     return new builders_1.EmbedBuilder()
         .setTitle(`${changelogEntry.date}`)
         .setDescription(`${description}`)
-        .setColor(discord_js_1.Colors.Purple);
+        .setColor(discord_js_1.Colors.Purple)
+        .setAuthor({
+        name: "viper-antiNerds",
+        iconURL: iconURL
+    })
+        .setThumbnail(iconURL);
 }, _LatestSlashCommand_sendChangelogEmbedToChannel = function _LatestSlashCommand_sendChangelogEmbedToChannel(guild, channelId, embed) {
     guild === null || guild === void 0 ? void 0 : guild.channels.fetch(channelId).then(channel => {
         if (channel === null || channel === void 0 ? void 0 : channel.isTextBased) {
