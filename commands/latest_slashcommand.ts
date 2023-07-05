@@ -1,7 +1,8 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { ChatInputCommandInteraction, ColorResolvable, Colors, Guild, SlashCommandBuilder, TextBasedChannel } from "discord.js";
+import { ChatInputCommandInteraction, Colors, Guild, GuildBasedChannel, Message, SlashCommandBuilder, TextBasedChannel } from "discord.js";
 import axios from 'axios';
 import { changelogURL, optionsURL } from "../config.json";
+import { guildId, changelog_channel_id } from "../options.json";
 
 /** Sends the latest changelog entry to the changelog channel as a nicely-formatted embed.
  * 
@@ -25,17 +26,17 @@ export default class LatestSlashCommand {
         return data.data.items;
     }
 
-    /** Returns the changelog channel id from the github options.
-     * 
-     * @param url 
-     * @returns 
-     */
-    static async #getChangelogChannelIDFromGitHub(): Promise<string> {
-        // Use axios to retrieve the data.
-        const response = await axios.get(optionsURL);
-        const parsedData = response.data;
-        return parsedData["changelog_channel_id"];
-    }
+    // /** Returns the changelog channel id from the github options.
+    //  * 
+    //  * @param url 
+    //  * @returns 
+    //  */
+    // static async #getChangelogChannelIDFromGitHub(): Promise<string> {
+    //     // Use axios to retrieve the data.
+    //     const response = await axios.get(optionsURL);
+    //     const parsedData = response.data;
+    //     return parsedData["changelog_channel_id"];
+    // }
 
     /** Returns a nicely-formatted embed that displays a changelog entry.
      * 
@@ -48,7 +49,7 @@ export default class LatestSlashCommand {
         var description: string = "";
 
         // Append the changes.
-        for(const index in changelogEntry.changes) {
+        for (const index in changelogEntry.changes) {
             description += `➤ ${changelogEntry.changes[index]}\n`;
         }
 
@@ -71,14 +72,25 @@ export default class LatestSlashCommand {
      * @param channelId The id of the channel to send the embed to.
      * @param embed The embedbuilder to send to the channel.
      */
-    static #sendChangelogEmbedToChannel(guild: Guild, channelId: string, embed: EmbedBuilder) {
-        guild?.channels.fetch(channelId).then(channel => {
-            if (channel?.isTextBased) {
-                (channel as TextBasedChannel).send({
-                    embeds: [embed]
-                })
-            }
-        })
+    static async #sendChangelogEmbedToChannel(guild: Guild, channelId: string, embed: EmbedBuilder) {
+
+        // Fetch the channel.
+        const channel: GuildBasedChannel | null = await guild.channels.fetch(channelId);
+
+        // If the channel is null, throw an error.
+        if (channel === null) {
+            throw new Error(`channel is null.`);
+        }
+
+        // Attempt to send the message to the channel.
+        const sentMessage: Message | null = await (channel as TextBasedChannel).send({
+            embeds: [embed]
+        });
+
+        // If the message is null, throw an error.
+        if(sentMessage === null) {
+            throw new Error(`Message failed to send. Check the channel/bot permissions.`);
+        }
     }
 
     static async execute(interaction: ChatInputCommandInteraction) {
@@ -95,11 +107,18 @@ export default class LatestSlashCommand {
         const embed = this.#getChangelogEmbed(data[0]);
 
         // Get the changelog channel ID from the github.
-        const changelogChannelID: string = await this.#getChangelogChannelIDFromGitHub();
+        const changelogChannelID: string = changelog_channel_id;
+
+        // Fetch the guild by the id.
+        const guild: Guild | null = await interaction.client.guilds.fetch(guildId);
+
+        // If the guild is null, throw an error.
+        if(guild === null) {
+            throw new Error(`guild is null. Check the id.`);
+        }
 
         // Send the embed to the changelog channel.
-        this.#sendChangelogEmbedToChannel(interaction.guild, changelogChannelID, embed);
-
+        this.#sendChangelogEmbedToChannel(guild, changelogChannelID, embed);
 
         // Reply to the interaction.
         await interaction.reply({
