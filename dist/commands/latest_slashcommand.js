@@ -68,7 +68,7 @@ _a = LatestSlashCommand, _LatestSlashCommand_getChangelogFromGitHub = function _
     for (const index in changelogEntry.changes) {
         description += `➤ ${changelogEntry.changes[index]}\n`;
     }
-    const iconURL = "https://cdn.discordapp.com/attachments/1030793773921345556/1047605904645824582/ViperNeon.png";
+    const iconURL = "https://github.com/AlterBotCreations/Viper-Changelog-Bot/blob/main/Viper3.0White.png?raw=true";
     return new builders_1.EmbedBuilder()
         .setTitle(`${changelogEntry.date}`)
         .setDescription(`${description}`)

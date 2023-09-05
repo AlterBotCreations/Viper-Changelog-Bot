@@ -53,7 +53,7 @@ export default class LatestSlashCommand {
             description += `➤ ${changelogEntry.changes[index]}\n`;
         }
 
-        const iconURL: string = "https://cdn.discordapp.com/attachments/1030793773921345556/1047605904645824582/ViperNeon.png";
+        const iconURL: string = "https://github.com/AlterBotCreations/Viper-Changelog-Bot/blob/main/Viper3.0White.png?raw=true";
 
         return new EmbedBuilder()
             .setTitle(`${changelogEntry.date}`)
