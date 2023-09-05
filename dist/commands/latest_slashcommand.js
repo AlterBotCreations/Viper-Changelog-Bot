@@ -74,7 +74,7 @@ _a = LatestSlashCommand, _LatestSlashCommand_getChangelogFromGitHub = function _
         .setDescription(`${description}`)
         .setColor(discord_js_1.Colors.Purple)
         .setAuthor({
-        name: "viper-antiNerds",
+        name: "Viper Roleplay 3.0",
         iconURL: iconURL
     })
         .setThumbnail(iconURL);

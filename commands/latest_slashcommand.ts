@@ -60,7 +60,7 @@ export default class LatestSlashCommand {
             .setDescription(`${description}`)
             .setColor(Colors.Purple)
             .setAuthor({
-                name: "viper-antiNerds",
+                name: "Viper Roleplay 3.0",
                 iconURL: iconURL
             })
             .setThumbnail(iconURL);
